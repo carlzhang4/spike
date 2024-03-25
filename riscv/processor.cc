@@ -205,6 +205,11 @@ void state_t::reset(processor_t* const proc, reg_t max_isa)
   v = prev_v = false;
   prv_changed = false;
   v_changed = false;
+
+  
+	for (int i = 0; i < 176; ++i) {
+		csrmap[CSR_RDMA + i] = mrdma[i] = std::make_shared<basic_csr_t>(proc, CSR_RDMA + i, 0);
+	}
   csrmap[CSR_MISA] = misa = std::make_shared<misa_csr_t>(proc, CSR_MISA, max_isa);
   mstatus = std::make_shared<mstatus_csr_t>(proc, CSR_MSTATUS);
 

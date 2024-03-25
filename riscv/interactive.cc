@@ -267,6 +267,7 @@ void sim_t::interactive()
   typedef void (sim_t::*interactive_func)(const std::string&, const std::vector<std::string>&);
   std::map<std::string,interactive_func> funcs;
 
+  funcs["csr"] = &sim_t::interactive_csr;
   funcs["run"] = &sim_t::interactive_run_noisy;
   funcs["r"] = funcs["run"];
   funcs["rs"] = &sim_t::interactive_run_silent;
@@ -562,6 +563,28 @@ void sim_t::interactive_vreg(const std::string& cmd, const std::vector<std::stri
     }
     out << std::endl;
   }
+}
+
+void sim_t::interactive_csr(const std::string& cmd, const std::vector<std::string>& args){
+	if (args.size() != 1)
+    	throw trap_interactive();
+
+	processor_t *p = get_core(0);
+	int max_xlen = p->get_isa().get_max_xlen();
+
+	std::ostream out(sout_.rdbuf());
+	out << std::hex;
+
+	char *ptr;
+	unsigned long csr_number = strtoul(args[0].c_str(), &ptr, 10);
+	if (*ptr || csr_number > 4096){
+		out<<std::dec<<"csr_number error:"<<csr_number<<std::endl;
+		throw trap_interactive();
+	}
+
+	out << "0x" << std::setfill('0') << std::setw(max_xlen/4)
+        << zext(p->get_csr(csr_number), max_xlen) << std::endl;
+
 }
 
 void sim_t::interactive_reg(const std::string& cmd, const std::vector<std::string>& args)
